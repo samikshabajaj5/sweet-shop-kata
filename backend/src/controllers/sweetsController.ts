@@ -59,5 +59,18 @@ export const updateSweet = async (req: Request, res: Response) => {
 };
 
 export const deleteSweet = async (req: Request, res: Response) => {
-  return res.status(403).json({ error: "Admins only" });
+  try {
+    const id = req.params.id;
+
+    const sweet = await Sweet.findByPk(id);
+    if (!sweet) return res.status(404).json({ error: "Sweet not found" });
+
+    await sweet.destroy();
+
+    return res.status(200).json({ message: "Sweet deleted" });
+  } catch (error: any) {
+    return res
+      .status(500)
+      .json({ error: "Failed to delete sweet", details: error.message });
+  }
 };
