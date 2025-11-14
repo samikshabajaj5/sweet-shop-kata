@@ -1,29 +1,24 @@
-import { DataTypes, Model, Optional } from "sequelize";
-import db from "../utils/db";
+import {
+  DataTypes,
+  Model,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+} from "sequelize";
+import sequelize from "../utils/db";
+import bcrypt from "bcrypt";
 
-interface UserAttributes {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  role: string;
-}
+// The official recommended typing method (no class fields!)
+class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+  declare id: CreationOptional<number>;
+  declare name: string;
+  declare email: string;
+  declare password: string;
+  declare role: CreationOptional<string>;
 
-interface UserCreationAttributes
-  extends Optional<UserAttributes, "id" | "role"> {}
-
-class User
-  extends Model<UserAttributes, UserCreationAttributes>
-  implements UserAttributes
-{
-  public id!: number;
-  public name!: string;
-  public email!: string;
-  public password!: string;
-  public role!: string;
-
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  async comparePassword(plain: string): Promise<boolean> {
+    return bcrypt.compare(plain, this.password);
+  }
 }
 
 User.init(
@@ -57,8 +52,21 @@ User.init(
     },
   },
   {
-    sequelize: db,
+    sequelize,
     tableName: "users",
+    modelName: "User",
+    hooks: {
+      beforeCreate: async (user) => {
+        if (user.password) {
+          user.password = await bcrypt.hash(user.password, 10);
+        }
+      },
+      beforeUpdate: async (user) => {
+        if (user.changed("password")) {
+          user.password = await bcrypt.hash(user.password, 10);
+        }
+      },
+    },
   },
 );
 
