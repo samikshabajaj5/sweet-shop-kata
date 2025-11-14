@@ -9,6 +9,10 @@ export const register = async (req: Request, res: Response) => {
 
     const hashed = await bcrypt.hash(password, 10);
 
+    if (await User.findOne({ where: { email } })) {
+      return res.status(400).json({ error: "Email already in use" });
+    }
+
     await User.create({ name, email, password: hashed });
 
     return res.status(201).json({ message: "User registered successfully" });
