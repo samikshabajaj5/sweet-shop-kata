@@ -33,10 +33,12 @@ async function getUserToken() {
  * (We will fake admin using JWT payload modification for now)
  */
 async function getAdminToken() {
+  // Register admin with explicit role
   await request(app).post("/api/auth/register").send({
     name: "Admin",
     email: "admin@example.com",
     password: "password123",
+    role: "admin", // NEW → required for adminMiddleware
   });
 
   const login = await request(app).post("/api/auth/login").send({
@@ -44,11 +46,7 @@ async function getAdminToken() {
     password: "password123",
   });
 
-  const jwt = login.body.token;
-
-  // tests expect adminMiddleware to detect admin,
-  // in GREEN we will decode + modify token or use role in DB
-  return jwt;
+  return login.body.token;
 }
 
 describe("Inventory API (RED)", () => {
