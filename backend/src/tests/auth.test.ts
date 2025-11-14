@@ -13,7 +13,7 @@ afterAll(async () => {
 
 describe("Authentication", () => {
   it("should register a user", async () => {
-    const res = await request(app).post("/api/auth/register").send({
+    const res = await request(app).post("/api/v1/auth/register").send({
       name: "Test User",
       email: "test@example.com",
       password: "password123",
@@ -24,7 +24,7 @@ describe("Authentication", () => {
   });
 
   it("should login a user and return token", async () => {
-    const res = await request(app).post("/api/auth/login").send({
+    const res = await request(app).post("/api/v1/auth/login").send({
       email: "test@example.com",
       password: "password123",
     });
