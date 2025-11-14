@@ -18,12 +18,6 @@ import {
 
 const router = Router();
 
-/**
- * -----------------------------------------------------
- * SWEETS CRUD (Protected)
- * -----------------------------------------------------
- */
-
 // CREATE sweet
 router.post(
   "/",
@@ -48,12 +42,6 @@ router.put("/:id", authMiddleware, updateSweet);
 
 // DELETE sweet (admin only)
 router.delete("/:id", authMiddleware, adminMiddleware, deleteSweet);
-
-/**
- * -----------------------------------------------------
- * INVENTORY MANAGEMENT (Protected)
- * -----------------------------------------------------
- */
 
 // PURCHASE sweet
 router.post("/:id/purchase", authMiddleware, purchaseSweet);
