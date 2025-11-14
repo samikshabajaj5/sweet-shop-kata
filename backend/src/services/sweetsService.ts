@@ -91,7 +91,7 @@ export const adjustQuantity = async (id: string | number, delta: number) => {
   const current = sweet.getDataValue("quantity");
   const newQty = current + delta;
 
-  if (newQty < 0) throw new ValidationError("Insufficient quantity");
+  if (newQty < 0) throw new ValidationError("Out of stock");
 
   await sweet.update({ quantity: newQty });
   return sweet;
