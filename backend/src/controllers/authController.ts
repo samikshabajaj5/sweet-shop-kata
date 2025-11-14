@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import { registerUserService, loginUserService } from "../services/authService";
+import { sendResponse } from "../utils/sendResponse";
 
 export const register = async (req: Request, res: Response) => {
   const user = await registerUserService(req.body);
 
-  return res.status(201).json({
-    success: true,
+  return sendResponse(res, {
+    statusCode: 201,
     data: {
       id: user.id,
       name: user.name,
@@ -21,8 +22,8 @@ export const login = async (req: Request, res: Response) => {
     req.body.password,
   );
 
-  return res.status(200).json({
-    success: true,
+  return sendResponse(res, {
+    statusCode: 200,
     data: {
       token,
       user: {
