@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import User from "../models/User";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
+import dotenv from "dotenv";
+dotenv.config();
 export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
