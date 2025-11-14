@@ -2,13 +2,15 @@ import { Router } from "express";
 import { authMiddleware } from "../middleware/authMiddleware";
 import { adminMiddleware } from "../middleware/adminMiddleware";
 import { validate } from "../middleware/validate";
+
 import {
   createSweet,
-  deleteSweet,
   getAllSweets,
   searchSweets,
   updateSweet,
+  deleteSweet,
 } from "../controllers/sweetsController";
+
 import {
   purchaseSweet,
   restockSweet,
@@ -16,7 +18,13 @@ import {
 
 const router = Router();
 
-// Create sweet
+/**
+ * -----------------------------------------------------
+ * SWEETS CRUD (Protected)
+ * -----------------------------------------------------
+ */
+
+// CREATE sweet
 router.post(
   "/",
   authMiddleware,
@@ -29,21 +37,28 @@ router.post(
   createSweet,
 );
 
-// List sweets
+// LIST all
 router.get("/", authMiddleware, getAllSweets);
 
-// Search
+// SEARCH sweets
 router.get("/search", authMiddleware, searchSweets);
 
-// Update
+// UPDATE sweet
 router.put("/:id", authMiddleware, updateSweet);
 
-// Purchase
+// DELETE sweet (admin only)
+router.delete("/:id", authMiddleware, adminMiddleware, deleteSweet);
+
+/**
+ * -----------------------------------------------------
+ * INVENTORY MANAGEMENT (Protected)
+ * -----------------------------------------------------
+ */
+
+// PURCHASE sweet
 router.post("/:id/purchase", authMiddleware, purchaseSweet);
 
-// Restock (admin only)
+// RESTOCK sweet (admin only)
 router.post("/:id/restock", authMiddleware, adminMiddleware, restockSweet);
-
-router.delete("/:id", authMiddleware, adminMiddleware, deleteSweet);
 
 export default router;
