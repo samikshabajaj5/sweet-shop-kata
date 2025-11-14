@@ -1,8 +1,14 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
-import { BadRequestError, UnauthorizedError } from "../errors/AppError";
-
+import {
+  AppError,
+  BadRequestError,
+  UnauthorizedError,
+} from "../errors/AppError";
+import dotenv from "dotenv";
+dotenv.config();
+// configDotenv.config()
 const JWT_SECRET = process.env.JWT_SECRET || "secret123";
 const JWT_EXPIRES = "7d";
 
@@ -23,42 +29,38 @@ export const registerUserService = async (payload: {
     throw new BadRequestError("Email already exists");
   }
 
-  const hashed = await bcrypt.hash(password, 10);
+  //   const hashed = await bcrypt.hash(password, 10);
 
   const user = await User.create({
     name,
     email,
-    password: hashed,
+    password,
     role,
   });
 
   return user;
 };
 
-export const loginUserService = async (email: string, password: string) => {
-  if (!email || !password) {
-    throw new BadRequestError("Email and password are required");
-  }
+export const loginUserService = async (data: any) => {
+  const user = await User.findOne({
+    where: { email: data.email },
+  });
 
-  const user = await User.findOne({ where: { email } });
   if (!user) {
-    throw new UnauthorizedError("Invalid credentials");
+    throw new AppError("Invalid email or password", 401);
   }
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    throw new UnauthorizedError("Invalid credentials");
+  const valid = await user.comparePassword(data.password);
+
+  if (!valid) {
+    throw new AppError("Invalid email or password", 401);
   }
 
   const token = jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES },
+    { id: user.id, role: user.role },
+    process.env.JWT_SECRET as string,
+    { expiresIn: "7d" },
   );
 
-  return { token, user };
+  return { token };
 };
