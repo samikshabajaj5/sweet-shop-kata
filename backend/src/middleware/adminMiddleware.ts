@@ -6,6 +6,8 @@ export const adminMiddleware = (
   res: Response,
   next: NextFunction,
 ) => {
-  // For now, always block (tests expect 403)
-  return res.status(403).json({ error: "Forbidden: Admins only" });
+  // If future user model contains "role", check:
+  // if (req.user.role !== "admin") return res.status(403).json({ error: "Admins only" });
+
+  return res.status(403).json({ error: "Admins only" });
 };
