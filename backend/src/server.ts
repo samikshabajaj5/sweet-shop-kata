@@ -10,5 +10,5 @@ const PORT = process.env.PORT || 4000;
 // for postgress normally listen to the port
 db.sync().then(() => {
   console.log("SQLite DB synced");
-  app.listen(PORT, () => console.log("Server running on port 3000"));
+  app.listen(PORT, () => console.log("Server running on port 4000"));
 });
