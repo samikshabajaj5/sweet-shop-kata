@@ -8,9 +8,14 @@ import {
   searchSweets,
   updateSweet,
 } from "../controllers/sweetsController";
+import {
+  purchaseSweet,
+  restockSweet,
+} from "../controllers/inventoryController";
 
 const router = Router();
 
+// Create sweet
 router.post(
   "/",
   authMiddleware,
@@ -23,10 +28,19 @@ router.post(
   createSweet,
 );
 
+// List sweets
 router.get("/", authMiddleware, getAllSweets);
+
+// Search
 router.get("/search", authMiddleware, searchSweets);
+
+// Update
 router.put("/:id", authMiddleware, updateSweet);
 
-router.delete("/:id", authMiddleware, adminMiddleware);
+// Purchase
+router.post("/:id/purchase", authMiddleware, purchaseSweet);
+
+// Restock (admin only)
+router.post("/:id/restock", authMiddleware, adminMiddleware, restockSweet);
 
 export default router;
