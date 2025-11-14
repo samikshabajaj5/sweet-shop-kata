@@ -10,14 +10,14 @@ beforeAll(async () => {
 afterAll(async () => {});
 
 async function createUserAndLogin(email: string, role: "user" | "admin") {
-  await request(app).post("/api/auth/register").send({
+  await request(app).post("/api/v1/auth/register").send({
     name: "TestUser",
     email,
     password: "password123",
     role,
   });
 
-  const login = await request(app).post("/api/auth/login").send({
+  const login = await request(app).post("/api/v1/auth/login").send({
     email,
     password: "password123",
   });
@@ -25,7 +25,7 @@ async function createUserAndLogin(email: string, role: "user" | "admin") {
   return login.body.token;
 }
 
-describe("DELETE /api/sweets/:id (RED)", () => {
+describe("DELETE /api/v1/sweets/:id (RED)", () => {
   let userToken: string;
   let adminToken: string;
   let sweetId: number;
@@ -37,7 +37,7 @@ describe("DELETE /api/sweets/:id (RED)", () => {
 
     // Create a sweet
     const res = await request(app)
-      .post("/api/sweets")
+      .post("/api/v1/sweets")
       .set("Authorization", `Bearer ${userToken}`)
       .send({
         name: "Gummy Bear",
@@ -51,7 +51,7 @@ describe("DELETE /api/sweets/:id (RED)", () => {
 
   it("should return 403 for non-admin user", async () => {
     const res = await request(app)
-      .delete(`/api/sweets/${sweetId}`)
+      .delete(`/api/v1/sweets/${sweetId}`)
       .set("Authorization", `Bearer ${userToken}`);
 
     expect(res.status).toBe(403);
@@ -59,7 +59,7 @@ describe("DELETE /api/sweets/:id (RED)", () => {
 
   it("should delete sweet for admin user", async () => {
     const res = await request(app)
-      .delete(`/api/sweets/${sweetId}`)
+      .delete(`/api/v1/sweets/${sweetId}`)
       .set("Authorization", `Bearer ${adminToken}`);
 
     expect(res.status).toBe(200);
@@ -68,7 +68,7 @@ describe("DELETE /api/sweets/:id (RED)", () => {
 
   it("should return 404 when deleting non-existing sweet", async () => {
     const res = await request(app)
-      .delete(`/api/sweets/99999`)
+      .delete(`/api/v1/sweets/99999`)
       .set("Authorization", `Bearer ${adminToken}`);
 
     expect(res.status).toBe(404);
