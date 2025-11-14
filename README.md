@@ -1,0 +1,3 @@
+# Sweet Shop Management System – TDD Kata
+
+Work in progress...
