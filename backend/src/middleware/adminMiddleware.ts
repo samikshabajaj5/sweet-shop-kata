@@ -6,8 +6,10 @@ export const adminMiddleware = (
   res: Response,
   next: NextFunction,
 ) => {
-  // If future user model contains "role", check:
-  // if (req.user.role !== "admin") return res.status(403).json({ error: "Admins only" });
+  // role should come from JWT payload
+  if (!req.user || req.user.role !== "admin") {
+    return res.status(403).json({ error: "Admins only" });
+  }
 
-  return res.status(403).json({ error: "Admins only" });
+  return next();
 };
