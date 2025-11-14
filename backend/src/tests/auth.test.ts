@@ -3,7 +3,7 @@ import app from "../app";
 import db from "../utils/db";
 
 beforeAll(async () => {
-  //   await db.sync({ force: true }); // reset tables
+  await db.sync({ force: true }); // reset tables
 });
 
 afterAll(async () => {
