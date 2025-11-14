@@ -1,50 +1,62 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
+import User from "../models/User";
+import { UnauthorizedError, ForbiddenError } from "../errors/AppError";
+import { Request } from "express";
+
+const JWT_SECRET = process.env.JWT_SECRET || "secret123";
 
 export interface AuthRequest extends Request {
   user?: any;
 }
 
-// Extract & verify JWT
-const verifyToken = (token: string) => {
-  const secret = process.env.JWT_SECRET || "secret123";
-  return jwt.verify(token, secret);
-};
-
-// Extract token from Authorization header
-const extractToken = (header?: string) => {
-  if (!header) return null;
-  const parts = header.split(" ");
-  if (parts.length !== 2 || parts[0] !== "Bearer") return null;
-  return parts[1];
-};
-
-export const authMiddleware = (
+export const authenticate = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction,
 ) => {
-  try {
-    const token = extractToken(req.headers.authorization);
+  const authHeader = req.headers.authorization;
 
-    if (!token) {
-      return res.status(401).json({ error: "No token provided" });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new UnauthorizedError("No token provided");
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+
+    // Fetch fresh user from DB
+    const user = await User.findByPk(decoded.id);
+
+    if (!user) {
+      throw new UnauthorizedError("User not found");
     }
 
-    const decoded = verifyToken(token);
-
-    // set decoded JWT payload on req.user
-    req.user = decoded;
+    req.user = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
 
     next();
-  } catch (err: any) {
-    if (err.name === "TokenExpiredError") {
-      return res.status(401).json({ error: "Token expired" });
-    }
-    if (err.name === "JsonWebTokenError") {
-      return res.status(401).json({ error: "Invalid token" });
-    }
-
-    return res.status(500).json({ error: "Authentication failed" });
+  } catch (err) {
+    throw new UnauthorizedError("Invalid or expired token");
   }
+};
+
+export const isAdmin = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (!req.user) {
+    throw new UnauthorizedError("Not authenticated");
+  }
+
+  if (req.user.role !== "admin") {
+    throw new ForbiddenError("Admin access required");
+  }
+
+  next();
 };
