@@ -7,7 +7,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await db.close();
+  // no need to close when using sqllite
+  //   await db.close();
 });
 
 describe("Authentication", () => {

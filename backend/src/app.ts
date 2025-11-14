@@ -8,7 +8,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-db.authenticate().then(() => console.log("DB connected"));
+// for postgress
+// db.authenticate().then(() => console.log("DB connected"));
 
 // Health check route
 app.get("/", (req, res) => {
