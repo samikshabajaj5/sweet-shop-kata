@@ -5,13 +5,14 @@ import authRoutes from "./routes/authRoutes";
 import sweetsRoutes from "./routes/sweetsRoutes";
 import { AppError } from "./errors/AppError";
 import { loggingMiddleware } from "./middleware/loggingMiddleware";
+import { responseLogger } from "./middleware/responseLogger";
 
 const app = express();
 
 const API_PREFIX = "/api/v1";
 
 app.use(loggingMiddleware);
-
+app.use(responseLogger);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
