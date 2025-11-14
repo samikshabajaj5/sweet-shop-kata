@@ -6,6 +6,7 @@ import sweetsRoutes from "./routes/sweetsRoutes";
 import { AppError } from "./errors/AppError";
 import { loggingMiddleware } from "./middleware/loggingMiddleware";
 import { responseLogger } from "./middleware/responseLogger";
+import { setupSwagger } from "./swagger";
 
 const app = express();
 
@@ -27,6 +28,8 @@ app.get("/", (req, res) => {
 
 app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/sweets`, sweetsRoutes);
+
+setupSwagger(app);
 
 /**
  * Any uncaught error thrown in controllers or middleware
