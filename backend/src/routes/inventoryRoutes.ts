@@ -9,20 +9,24 @@ import { authenticate, isAdmin } from "../middleware/authMiddleware";
 import { validate } from "../middleware/validate";
 import { purchaseSchema, restockSchema } from "../schemas/inventory.schema";
 
+import { asyncHandler } from "../middleware/asyncHandler";
+
 const router = Router();
 
-// Must be logged in for all inventory actions
+// Must be logged in
 router.use(authenticate);
 
-// Purchase sweet (no body, only params)
-router.post("/:id/purchase", validate(purchaseSchema, "params"), purchaseSweet);
+router.post(
+  "/:id/purchase",
+  validate(purchaseSchema, "params"),
+  asyncHandler(purchaseSweet),
+);
 
-// Restock sweet (admin only)
 router.post(
   "/:id/restock",
   isAdmin,
-  validate(restockSchema), // validates both body + params
-  restockSweet,
+  validate(restockSchema),
+  asyncHandler(restockSweet),
 );
 
 export default router;
