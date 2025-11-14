@@ -4,6 +4,7 @@ import { adminMiddleware } from "../middleware/adminMiddleware";
 import { validate } from "../middleware/validate";
 import {
   createSweet,
+  deleteSweet,
   getAllSweets,
   searchSweets,
   updateSweet,
@@ -43,6 +44,6 @@ router.post("/:id/purchase", authMiddleware, purchaseSweet);
 // Restock (admin only)
 router.post("/:id/restock", authMiddleware, adminMiddleware, restockSweet);
 
-router.delete("/:id", authMiddleware, adminMiddleware);
+router.delete("/:id", authMiddleware, adminMiddleware, deleteSweet);
 
 export default router;
