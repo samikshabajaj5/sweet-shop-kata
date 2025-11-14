@@ -15,20 +15,25 @@ import {
   updateSweetSchema,
   searchSweetSchema,
 } from "../schemas/sweet.schema";
+import { asyncHandler } from "../middleware/asyncHandler";
 
 const router = Router();
 
-// Protected: must be logged in
+// Protected
 router.use(authenticate);
 
-router.post("/", validate(createSweetSchema), createSweet);
+router.post("/", validate(createSweetSchema), asyncHandler(createSweet));
 
-router.get("/", getAllSweets);
+router.get("/", asyncHandler(getAllSweets));
 
-router.get("/search", validate(searchSweetSchema, "query"), searchSweets);
+router.get(
+  "/search",
+  validate(searchSweetSchema, "query"),
+  asyncHandler(searchSweets),
+);
 
-router.put("/:id", validate(updateSweetSchema), updateSweet);
+router.put("/:id", validate(updateSweetSchema), asyncHandler(updateSweet));
 
-router.delete("/:id", isAdmin, deleteSweet);
+router.delete("/:id", isAdmin, asyncHandler(deleteSweet));
 
 export default router;
