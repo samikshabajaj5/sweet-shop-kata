@@ -20,14 +20,14 @@ async function getAuthToken(
   password = "password123",
 ) {
   // register
-  await request(app).post("/api/auth/register").send({
+  await request(app).post("/api/v1/auth/register").send({
     name: "Test User",
     email,
     password,
   });
 
   // login
-  const loginRes = await request(app).post("/api/auth/login").send({
+  const loginRes = await request(app).post("/api/v1/auth/login").send({
     email,
     password,
   });
@@ -42,9 +42,9 @@ describe("Sweets API (RED) - failing tests until implementation", () => {
     token = await getAuthToken();
   });
 
-  it("POST /api/sweets should create a new sweet (protected)", async () => {
+  it("POST /api/v1/sweets should create a new sweet (protected)", async () => {
     const res = await request(app)
-      .post("/api/sweets")
+      .post("/api/v1/sweets")
       .set("Authorization", `Bearer ${token}`)
       .send({
         name: "Chocolate Truffle",
@@ -64,9 +64,9 @@ describe("Sweets API (RED) - failing tests until implementation", () => {
     });
   });
 
-  it("GET /api/sweets should return list of sweets", async () => {
+  it("GET /api/v1/sweets should return list of sweets", async () => {
     const res = await request(app)
-      .get("/api/sweets")
+      .get("/api/v1/sweets")
       .set("Authorization", `Bearer ${token}`);
 
     // Expect 200 and an array (will fail until implemented)
@@ -76,10 +76,10 @@ describe("Sweets API (RED) - failing tests until implementation", () => {
     expect(res.body.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("GET /api/sweets/search should filter sweets by name, category and price range", async () => {
+  it("GET /api/v1/sweets/search should filter sweets by name, category and price range", async () => {
     // create another sweet to test search
     await request(app)
-      .post("/api/sweets")
+      .post("/api/v1/sweets")
       .set("Authorization", `Bearer ${token}`)
       .send({
         name: "Lemon Tart",
@@ -89,7 +89,7 @@ describe("Sweets API (RED) - failing tests until implementation", () => {
       });
 
     const resByName = await request(app)
-      .get("/api/sweets/search")
+      .get("/api/v1/sweets/search")
       .query({ name: "Lemon" })
       .set("Authorization", `Bearer ${token}`);
 
@@ -98,7 +98,7 @@ describe("Sweets API (RED) - failing tests until implementation", () => {
     expect(resByName.body.some((s: any) => /Lemon/i.test(s.name))).toBe(true);
 
     const resByCategory = await request(app)
-      .get("/api/sweets/search")
+      .get("/api/v1/sweets/search")
       .query({ category: "Chocolate" })
       .set("Authorization", `Bearer ${token}`);
 
@@ -108,7 +108,7 @@ describe("Sweets API (RED) - failing tests until implementation", () => {
     ).toBe(true);
 
     const resByPriceRange = await request(app)
-      .get("/api/sweets/search")
+      .get("/api/v1/sweets/search")
       .query({ minPrice: 2.0, maxPrice: 3.0 })
       .set("Authorization", `Bearer ${token}`);
 
@@ -118,10 +118,10 @@ describe("Sweets API (RED) - failing tests until implementation", () => {
     ).toBe(true);
   });
 
-  it("PUT /api/sweets/:id should update a sweet", async () => {
+  it("PUT /api/v1/sweets/:id should update a sweet", async () => {
     // get sweets list to pick an id
     const listRes = await request(app)
-      .get("/api/sweets")
+      .get("/api/v1/sweets")
       .set("Authorization", `Bearer ${token}`);
 
     const sweets = listRes.body;
@@ -130,7 +130,7 @@ describe("Sweets API (RED) - failing tests until implementation", () => {
     expect(sweetId).toBeDefined();
 
     const updateRes = await request(app)
-      .put(`/api/sweets/${sweetId}`)
+      .put(`/api/v1/sweets/${sweetId}`)
       .set("Authorization", `Bearer ${token}`)
       .send({ price: 4.5, quantity: 20 });
 
@@ -142,10 +142,10 @@ describe("Sweets API (RED) - failing tests until implementation", () => {
     });
   });
 
-  it("DELETE /api/sweets/:id should return 403 for non-admin user", async () => {
+  it("DELETE /api/v1/sweets/:id should return 403 for non-admin user", async () => {
     // get sweets list to pick an id
     const listRes = await request(app)
-      .get("/api/sweets")
+      .get("/api/v1/sweets")
       .set("Authorization", `Bearer ${token}`);
 
     const sweets = listRes.body;
@@ -153,7 +153,7 @@ describe("Sweets API (RED) - failing tests until implementation", () => {
     expect(sweetId).toBeDefined();
 
     const delRes = await request(app)
-      .delete(`/api/sweets/${sweetId}`)
+      .delete(`/api/v1/sweets/${sweetId}`)
       .set("Authorization", `Bearer ${token}`);
 
     // We expect forbidden for non-admin (implementation will enforce roles later)
