@@ -9,7 +9,7 @@ export const setupSecurity = (app: Express) => {
   // ---------------------------------------------
   app.use(
     helmet({
-      contentSecurityPolicy: false, // keep simple for dev
+      contentSecurityPolicy: false, //  simple for dev
       crossOriginEmbedderPolicy: false,
     }),
   );
