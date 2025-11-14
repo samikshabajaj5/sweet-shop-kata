@@ -14,13 +14,13 @@ afterAll(async () => {
  * Helper to register & login as normal user
  */
 async function getUserToken() {
-  await request(app).post("/api/auth/register").send({
+  await request(app).post("/api/v1/auth/register").send({
     name: "User One",
     email: "user1@example.com",
     password: "password123",
   });
 
-  const login = await request(app).post("/api/auth/login").send({
+  const login = await request(app).post("/api/v1/auth/login").send({
     email: "user1@example.com",
     password: "password123",
   });
@@ -34,14 +34,14 @@ async function getUserToken() {
  */
 async function getAdminToken() {
   // Register admin with explicit role
-  await request(app).post("/api/auth/register").send({
+  await request(app).post("/api/v1/auth/register").send({
     name: "Admin",
     email: "admin@example.com",
     password: "password123",
     role: "admin", // NEW → required for adminMiddleware
   });
 
-  const login = await request(app).post("/api/auth/login").send({
+  const login = await request(app).post("/api/v1/auth/login").send({
     email: "admin@example.com",
     password: "password123",
   });
@@ -60,7 +60,7 @@ describe("Inventory API (RED)", () => {
 
     // create initial sweet
     const res = await request(app)
-      .post("/api/sweets")
+      .post("/api/v1/sweets")
       .set("Authorization", `Bearer ${userToken}`)
       .send({
         name: "Vanilla Cupcake",
@@ -72,9 +72,9 @@ describe("Inventory API (RED)", () => {
     sweetId = res.body.id;
   });
 
-  it("POST /api/sweets/:id/purchase should decrease quantity", async () => {
+  it("POST /api/v1/sweets/:id/purchase should decrease quantity", async () => {
     const res = await request(app)
-      .post(`/api/sweets/${sweetId}/purchase`)
+      .post(`/api/v1/sweets/${sweetId}/purchase`)
       .set("Authorization", `Bearer ${userToken}`)
       .send();
 
@@ -82,15 +82,15 @@ describe("Inventory API (RED)", () => {
     expect(res.body.quantity).toBe(4); // 5 → 4
   });
 
-  it("POST /api/sweets/:id/purchase should fail if quantity is zero", async () => {
+  it("POST /api/v1/sweets/:id/purchase should fail if quantity is zero", async () => {
     // Reduce quantity to 0
     await request(app)
-      .put(`/api/sweets/${sweetId}`)
+      .put(`/api/v1/sweets/${sweetId}`)
       .set("Authorization", `Bearer ${userToken}`)
       .send({ quantity: 0 });
 
     const res = await request(app)
-      .post(`/api/sweets/${sweetId}/purchase`)
+      .post(`/api/v1/sweets/${sweetId}/purchase`)
       .set("Authorization", `Bearer ${userToken}`)
       .send();
 
@@ -98,9 +98,9 @@ describe("Inventory API (RED)", () => {
     expect(res.body.error).toBe("Out of stock");
   });
 
-  it("POST /api/sweets/:id/restock should increase quantity (admin only)", async () => {
+  it("POST /api/v1/sweets/:id/restock should increase quantity (admin only)", async () => {
     const res = await request(app)
-      .post(`/api/sweets/${sweetId}/restock`)
+      .post(`/api/v1/sweets/${sweetId}/restock`)
       .set("Authorization", `Bearer ${adminToken}`)
       .send({ amount: 10 });
 
@@ -108,9 +108,9 @@ describe("Inventory API (RED)", () => {
     expect(res.body.quantity).toBe(10); // previously 0
   });
 
-  it("POST /api/sweets/:id/restock should return 403 for normal users", async () => {
+  it("POST /api/v1/sweets/:id/restock should return 403 for normal users", async () => {
     const res = await request(app)
-      .post(`/api/sweets/${sweetId}/restock`)
+      .post(`/api/v1/sweets/${sweetId}/restock`)
       .set("Authorization", `Bearer ${userToken}`)
       .send({ amount: 5 });
 
