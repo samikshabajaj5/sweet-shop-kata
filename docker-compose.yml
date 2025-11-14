@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  backend:
+    container_name: sweetshop-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      JWT_SECRET: supersecretjwt
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - sqlite_data:/app/data
+    command: npm run dev
+    depends_on:
+      - frontend
+    networks:
+      - sweetnet
+
+  frontend:
+    container_name: sweetshop-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000" # Next.js defaults to port 3000 inside container
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev
+    networks:
+      - sweetnet
+
+networks:
+  sweetnet:
+
+volumes:
+  sqlite_data:
+    driver: local
