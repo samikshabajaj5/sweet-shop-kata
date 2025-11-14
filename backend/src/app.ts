@@ -3,6 +3,8 @@ import cors from "cors";
 import db from "./utils/db";
 import authRoutes from "./routes/authRoutes";
 import sweetsRoutes from "./routes/sweetsRoutes";
+import inventoryRoutes from "./routes/inventoryRoutes";
+
 import { AppError } from "./errors/AppError";
 import { loggingMiddleware } from "./middleware/loggingMiddleware";
 import { responseLogger } from "./middleware/responseLogger";
@@ -29,6 +31,7 @@ app.get("/", (req, res) => {
 
 app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/sweets`, sweetsRoutes);
+app.use(`${API_PREFIX}/sweets`, inventoryRoutes);
 
 setupSecurity(app);
 setupSwagger(app);
