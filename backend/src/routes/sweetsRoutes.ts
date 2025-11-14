@@ -1,8 +1,4 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/authMiddleware";
-import { adminMiddleware } from "../middleware/adminMiddleware";
-import { validate } from "../middleware/validate";
-
 import {
   createSweet,
   getAllSweets,
@@ -11,42 +7,28 @@ import {
   deleteSweet,
 } from "../controllers/sweetsController";
 
+import { authenticate, isAdmin } from "../middleware/authMiddleware";
+
+import { validate } from "../middleware/validate";
 import {
-  purchaseSweet,
-  restockSweet,
-} from "../controllers/inventoryController";
+  createSweetSchema,
+  updateSweetSchema,
+  searchSweetSchema,
+} from "../schemas/sweet.schema";
 
 const router = Router();
 
-// CREATE sweet
-router.post(
-  "/",
-  authMiddleware,
-  validate({
-    name: ["required"],
-    category: ["required"],
-    price: ["required", "number"],
-    quantity: ["required", "number"],
-  }),
-  createSweet,
-);
+// Protected: must be logged in
+router.use(authenticate);
 
-// LIST all
-router.get("/", authMiddleware, getAllSweets);
+router.post("/", validate(createSweetSchema), createSweet);
 
-// SEARCH sweets
-router.get("/search", authMiddleware, searchSweets);
+router.get("/", getAllSweets);
 
-// UPDATE sweet
-router.put("/:id", authMiddleware, updateSweet);
+router.get("/search", validate(searchSweetSchema, "query"), searchSweets);
 
-// DELETE sweet (admin only)
-router.delete("/:id", authMiddleware, adminMiddleware, deleteSweet);
+router.put("/:id", validate(updateSweetSchema), updateSweet);
 
-// PURCHASE sweet
-router.post("/:id/purchase", authMiddleware, purchaseSweet);
-
-// RESTOCK sweet (admin only)
-router.post("/:id/restock", authMiddleware, adminMiddleware, restockSweet);
+router.delete("/:id", isAdmin, deleteSweet);
 
 export default router;
