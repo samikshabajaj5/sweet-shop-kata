@@ -1,8 +1,10 @@
 import Sweet from "../models/Sweet";
 import { Op } from "sequelize";
-
-export class NotFoundError extends Error {}
-export class ValidationError extends Error {}
+import {
+  NotFoundError,
+  ValidationError,
+  BadRequestError,
+} from "../errors/AppError";
 
 export const findSweetById = async (id: string | number) => {
   const sweet = await Sweet.findByPk(id);
@@ -16,14 +18,17 @@ export const createSweetService = async (payload: {
   price: number;
   quantity: number;
 }) => {
-  // basic validation
   if (!payload.name || !payload.category)
-    throw new ValidationError("Missing required fields");
-  if (typeof payload.price !== "number" || typeof payload.quantity !== "number")
-    throw new ValidationError("Price and quantity must be numbers");
+    throw new BadRequestError("Name and category are required");
 
-  const sweet = await Sweet.create(payload as any);
-  return sweet;
+  if (
+    typeof payload.price !== "number" ||
+    typeof payload.quantity !== "number"
+  ) {
+    throw new ValidationError("Price and quantity must be numbers");
+  }
+
+  return await Sweet.create(payload as any);
 };
 
 export const listSweetsService = async () => {
@@ -37,8 +42,10 @@ export const searchSweetsService = async (query: {
   maxPrice?: string | number;
 }) => {
   const filters: any = {};
+
   if (query.name) filters.name = { [Op.like]: `%${query.name}%` };
   if (query.category) filters.category = query.category;
+
   if (query.minPrice !== undefined || query.maxPrice !== undefined) {
     filters.price = {};
     if (query.minPrice !== undefined)
@@ -60,6 +67,15 @@ export const updateSweetService = async (
   }>,
 ) => {
   const sweet = await findSweetById(id);
+
+  if (payload.price !== undefined && typeof payload.price !== "number") {
+    throw new ValidationError("Price must be a number");
+  }
+
+  if (payload.quantity !== undefined && typeof payload.quantity !== "number") {
+    throw new ValidationError("Quantity must be a number");
+  }
+
   await sweet.update(payload as any);
   return sweet;
 };
@@ -74,7 +90,9 @@ export const adjustQuantity = async (id: string | number, delta: number) => {
   const sweet = await findSweetById(id);
   const current = sweet.getDataValue("quantity");
   const newQty = current + delta;
+
   if (newQty < 0) throw new ValidationError("Insufficient quantity");
+
   await sweet.update({ quantity: newQty });
   return sweet;
 };
