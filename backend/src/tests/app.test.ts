@@ -1,6 +1,5 @@
 import request from "supertest";
 import app from "../app";
-import { describe, it } from "node:test";
 
 describe("API Health Check", () => {
   it("should return healthy message", async () => {
