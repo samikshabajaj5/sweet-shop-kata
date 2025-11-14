@@ -1,54 +1,76 @@
 import { Request, Response } from "express";
-import {
-  createSweetService,
-  listSweetsService,
-  searchSweetsService,
-  updateSweetService,
-  deleteSweetService,
-} from "../services/sweetsService";
-import { sendResponse } from "../utils/sendResponse";
+import Sweet from "../models/Sweet";
+import { Op } from "sequelize";
 
 export const createSweet = async (req: Request, res: Response) => {
-  const sweet = await createSweetService(req.body);
+  try {
+    const { name, category, price, quantity } = req.body;
 
-  return sendResponse(res, {
-    statusCode: 201,
-    data: sweet,
-  });
+    const sweet = await Sweet.create({ name, category, price, quantity });
+    return res.status(201).json(sweet);
+  } catch (error: any) {
+    return res
+      .status(500)
+      .json({ error: "Failed to create sweet", details: error.message });
+  }
 };
 
 export const getAllSweets = async (req: Request, res: Response) => {
-  const sweets = await listSweetsService();
-
-  return sendResponse(res, {
-    statusCode: 200,
-    data: sweets,
-  });
+  try {
+    const sweets = await Sweet.findAll();
+    return res.status(200).json(sweets);
+  } catch (error: any) {
+    return res.status(500).json({ error: "Failed to fetch sweets" });
+  }
 };
 
 export const searchSweets = async (req: Request, res: Response) => {
-  const sweets = await searchSweetsService(req.query as any);
+  try {
+    const { name, category, minPrice, maxPrice } = req.query;
+    const filters: any = {};
 
-  return sendResponse(res, {
-    statusCode: 200,
-    data: sweets,
-  });
+    if (name) filters.name = { [Op.like]: `%${name}%` };
+    if (category) filters.category = category;
+    if (minPrice || maxPrice) {
+      filters.price = {};
+      if (minPrice) filters.price[Op.gte] = Number(minPrice);
+      if (maxPrice) filters.price[Op.lte] = Number(maxPrice);
+    }
+
+    const sweets = await Sweet.findAll({ where: filters });
+    return res.status(200).json(sweets);
+  } catch (error: any) {
+    return res.status(500).json({ error: "Sweet search failed" });
+  }
 };
 
 export const updateSweet = async (req: Request, res: Response) => {
-  const sweet = await updateSweetService(req.params.id, req.body);
+  try {
+    const id = req.params.id;
 
-  return sendResponse(res, {
-    statusCode: 200,
-    data: sweet,
-  });
+    const sweet = await Sweet.findByPk(id);
+    if (!sweet) return res.status(404).json({ error: "Sweet not found" });
+
+    await sweet.update(req.body);
+    return res.status(200).json(sweet);
+  } catch (error: any) {
+    return res.status(500).json({ error: "Failed to update sweet" });
+  }
 };
 
 export const deleteSweet = async (req: Request, res: Response) => {
-  await deleteSweetService(req.params.id);
+  try {
+    const id = req.params.id;
 
-  return sendResponse(res, {
-    statusCode: 200,
-    message: "Sweet deleted",
-  });
+    const sweet = await Sweet.findByPk(id);
+    if (!sweet) return res.status(404).json({ error: "Sweet not found" });
+
+    await sweet.destroy();
+
+    return res.status(200).json({ message: "Sweet deleted" });
+  } catch (error: any) {
+    return res
+      .status(500)
+      .json({ error: "Failed to delete sweet", details: error.message });
+  }
 };
