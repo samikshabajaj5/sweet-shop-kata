@@ -7,6 +7,7 @@ import { AppError } from "./errors/AppError";
 import { loggingMiddleware } from "./middleware/loggingMiddleware";
 import { responseLogger } from "./middleware/responseLogger";
 import { setupSwagger } from "./swagger";
+import { setupSecurity } from "./middleware/security";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.get("/", (req, res) => {
 app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/sweets`, sweetsRoutes);
 
+setupSecurity(app);
 setupSwagger(app);
 
 /**
