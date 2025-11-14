@@ -3,6 +3,7 @@ import cors from "cors";
 import db from "./utils/db";
 import authRoutes from "./routes/authRoutes";
 import sweetsRoutes from "./routes/sweetsRoutes";
+import { AppError } from "./errors/AppError";
 
 const app = express();
 
@@ -27,11 +28,20 @@ app.use(`${API_PREFIX}/sweets`, sweetsRoutes);
  * will be caught here to prevent server crashes.
  */
 app.use((err: any, req: any, res: any, next: any) => {
-  console.error("Unhandled Error:", err);
+  console.error("Global Error:", err);
+
+  // For AppError instances, use their statusCode and message
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      error: err.message,
+    });
+  }
+
+  // Unknown or programming errors → 500
   return res.status(500).json({
+    success: false,
     error: "Internal Server Error",
-    details: process.env.NODE_ENV === "development" ? err.message : undefined,
   });
 });
-
 export default app;
