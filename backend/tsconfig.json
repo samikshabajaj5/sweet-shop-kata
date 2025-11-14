@@ -46,21 +46,21 @@
 // }
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "commonjs",
-    "moduleResolution": "node",
-
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
 
     "strict": true,
 
-    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
 
     "types": ["jest", "node"],
 
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "module": "CommonJS",
+    "target": "ES2020",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "outDir": "dist"
   }
 }
