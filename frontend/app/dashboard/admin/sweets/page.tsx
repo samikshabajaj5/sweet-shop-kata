@@ -60,6 +60,17 @@ export default function AdminSweetsPage() {
                 >
                   Delete
                 </button>
+                <button
+                  onClick={async () => {
+                    await api.post(`/sweets/${sweet.id}/restock`, {
+                      quantity: 5,
+                    });
+                    fetchSweets();
+                  }}
+                  className="block mt-2 w-full bg-yellow-500 text-white py-2 rounded"
+                >
+                  Restock +5
+                </button>
               </div>
             ))}
           </div>
