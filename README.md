@@ -198,6 +198,216 @@ Next phase: Build the **Next.js frontend** and connect it to this API.
 Sweet Shop Backend — Completed ✔
 ```
 
+# 🎨 Frontend (Next.js) — Overview
+
+The frontend for the Sweet Shop Management System is built using:
+
+- **Next.js 14 (App Router)**
+- **React**
+- **Tailwind CSS**
+- **ShadCN UI Components**
+- **Axios**
+- **Context API for Authentication**
+- **Sonner Toast Notifications**
+
+It provides a clean, modern UI for users and admins to interact with the backend API.
+
+---
+
+# 🧁 Frontend Features
+
+### 👤 Authentication
+
+- Login using backend API
+- JWT stored in localStorage
+- Auto-redirect if not authenticated
+- Role-based UI rendering (admin/user)
+
+### 🍬 Sweets
+
+- List all sweets
+- Search sweets by name
+- View sweet details
+- Display sweet images
+- Purchase sweets (quantity reduces)
+
+### 🛠 Admin Tools
+
+- Add new sweets
+- Edit existing sweets
+- Delete sweets
+- Restock inventory
+- All operations protected by admin role check
+
+### 🎨 UI Components
+
+- ShadCN cards, inputs, buttons
+- Clean responsive layout
+- Image fallback support
+- Toast notifications for actions
+
+---
+
+# 📁 Frontend Project Structure
+
 ```
-Next.js Frontend — Pending ⏳
+frontend/
+  ├── app/
+  │   ├── login/
+  │   ├── dashboard/
+  │   ├── sweets/
+  │   ├── admin/
+  │   └── layout.tsx
+  │
+  ├── components/
+  │   ├── ui/
+  │   └── shared/
+  │
+  ├── context/
+  │   └── AuthContext.tsx
+  │
+  ├── lib/
+  │   └── api/axios.ts
+  │
+  ├── public/
+  │   └── placeholder.png
+  │
+  ├── styles/
+  └── README.md
+```
+
+---
+
+# 🔌 Connecting Frontend → Backend
+
+Create `.env.local` in the **frontend folder**:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
+```
+
+Axios automatically reads this:
+
+```ts
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+});
+```
+
+Every request includes JWT:
+
+```ts
+Authorization: Bearer<token>;
+```
+
+AuthContext injects token using axios interceptors.
+
+---
+
+# ▶️ Running the Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend runs on:
+
+```
+http://localhost:3000
+```
+
+Backend API must be running on port 4000.
+
+---
+
+# 📸 Image Handling
+
+Sweet images come from URLs stored in the database.
+
+If an image does not load:
+
+```tsx
+<img
+  src={sweet.imageUrl || "/placeholder.png"}
+  className="object-cover rounded-md"
+/>
+```
+
+Supported image domains are configured in `next.config.js`.
+
+---
+
+# 🤝 How Backend & Frontend Work Together
+
+### Backend provides:
+
+- Auth endpoints
+- Sweet CRUD
+- Purchase logic
+- Inventory updates
+
+### Frontend provides:
+
+- UI screens
+- Login form
+- Dashboard
+- Sweet list
+- Admin management UI
+- Purchase flow
+
+### Flow Example
+
+1. User logs in → frontend gets JWT
+2. Frontend fetches sweets → `/api/v1/sweets`
+3. User clicks “Buy” → frontend calls `/sweets/:id/purchase`
+4. Backend decreases quantity and returns updated value
+5. Frontend updates UI instantly
+
+---
+
+# 🧱 Production Deployment (Both Apps)
+
+### Backend:
+
+- Build with `npm run build`
+- Deploy `dist/` folder
+- Works on Docker, Render, Railway, GCP, Heroku, AWS, etc.
+
+### Frontend:
+
+- Deploy with:
+
+  - Vercel (recommended)
+  - Netlify
+  - Render Static
+  - Custom server
+
+### Required env variables:
+
+Backend:
+
+```
+PORT=4000
+JWT_SECRET=your-secret
+DATABASE_URL=file:./db.sqlite
+```
+
+Frontend:
+
+```
+NEXT_PUBLIC_API_URL=https://your-backend-url/api/v1
+```
+
+---
+
+# 🏁 Status
+
+Backend: **Complete ✔**
+Frontend: **Integrated & fully functional ✔**
+Images: **Working & stable after fix ✔**
+
+```
+Sweet Shop — Full Stack Implementation Ready 🚀
 ```
