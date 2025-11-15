@@ -2,37 +2,59 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const router = useRouter();
 
   return (
-    <nav className="flex justify-between items-center px-6 py-4 bg-blue-700 text-white">
+    <div className="w-full bg-white border-b border-neutral-200 px-6 py-3 flex justify-between items-center">
       <h1
-        className="text-xl font-bold cursor-pointer"
+        className="text-lg font-medium cursor-pointer"
         onClick={() => router.push("/dashboard")}
       >
         Sweet Shop
       </h1>
 
-      <div className="flex items-center gap-4">
-        {user && (
-          <span>
-            {user.name} ({user.role})
-          </span>
-        )}
+      {user ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">{user.email}</Button>
+          </DropdownMenuTrigger>
 
-        <button
-          onClick={() => {
-            logout();
-            router.push("/login");
-          }}
-          className="bg-red-500 px-3 py-1 rounded"
-        >
-          Logout
-        </button>
-      </div>
-    </nav>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => router.push("/sweets")}>
+              Sweets
+            </DropdownMenuItem>
+
+            {user.role === "admin" && (
+              <DropdownMenuItem
+                onClick={() => router.push("/admin/sweets/new")}
+              >
+                Add Sweet (Admin)
+              </DropdownMenuItem>
+            )}
+
+            <DropdownMenuItem
+              onClick={() => {
+                logout();
+                router.push("/login");
+              }}
+            >
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <Button onClick={() => router.push("/login")}>Login</Button>
+      )}
+    </div>
   );
 }
