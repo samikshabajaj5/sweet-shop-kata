@@ -89,7 +89,7 @@ export default function SweetsListPage() {
                         <td className="py-3">{sweet.name}</td>
                         <td className="py-3">{sweet.category}</td>
                         <td className="py-3">₹{sweet.price}</td>
-                        <td className="py-3">{sweet.stock ?? "-"}</td>
+                        <td className="py-3">{sweet.quantity ?? "-"}</td>
 
                         {user?.role === "admin" && (
                           <td className="py-3 flex gap-2">
