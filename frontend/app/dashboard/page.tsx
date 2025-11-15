@@ -1,86 +1,103 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import api from "@/lib/api/axios";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/context/AuthContext";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
-  const [sweets, setSweets] = useState<any[]>([]);
-  const [search, setSearch] = useState("");
-
-  const fetchSweets = async () => {
-    try {
-      const res = await api.get("/sweets");
-      setSweets(res.data);
-    } catch (err) {
-      console.error("Failed to fetch sweets", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchSweets();
-  }, []);
-
-  const filtered = sweets.filter((s) =>
-    s.name.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  const handlePurchase = async (id: number) => {
-    try {
-      await api.post(`/sweets/${id}/purchase`);
-      fetchSweets();
-    } catch (err) {
-      console.error("Purchase failed", err);
-    }
-  };
+  const { user, logout } = useAuth();
+  const router = useRouter();
 
   return (
-    <ProtectedRoute>
-      <div className="p-6">
-        <h1 className="text-3xl font-bold mb-6">Sweet Shop Dashboard</h1>
+    <div className="min-h-screen bg-white">
+      {/* Top Navbar */}
+      <header className="w-full border-b border-neutral-200 bg-white px-6 py-4 flex justify-between items-center">
+        <h1 className="text-xl font-semibold text-neutral-900">Sweet Shop</h1>
 
-        <input
-          type="text"
-          placeholder="Search sweets..."
-          className="border p-2 rounded w-80 mb-6"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="flex items-center gap-4">
+          {user && (
+            <span className="text-sm text-neutral-600">
+              Logged in as <span className="font-medium">{user.name}</span>
+            </span>
+          )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {filtered.map((sweet) => (
-            <div key={sweet.id} className="p-4 border rounded shadow bg-white">
-              <h2 className="text-xl font-bold">{sweet.name}</h2>
-              <p className="text-gray-600">{sweet.category}</p>
-              <p className="mt-2">₹ {sweet.price}</p>
-              <p className="mt-1 text-sm">
-                Quantity:{" "}
-                <span
-                  className={
-                    sweet.quantity > 0
-                      ? "text-green-700"
-                      : "text-red-600 font-semibold"
-                  }
-                >
-                  {sweet.quantity}
-                </span>
-              </p>
+          {user?.role === "admin" && (
+            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-md">
+              Admin
+            </span>
+          )}
 
-              <button
-                disabled={sweet.quantity === 0}
-                onClick={() => handlePurchase(sweet.id)}
-                className={`mt-4 w-full py-2 rounded ${
-                  sweet.quantity === 0
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 text-white"
-                }`}
-              >
-                {sweet.quantity === 0 ? "Out of Stock" : "Purchase"}
-              </button>
-            </div>
-          ))}
+          <Button
+            variant="outline"
+            onClick={() => {
+              logout();
+              router.push("/login");
+            }}
+          >
+            Logout
+          </Button>
         </div>
-      </div>
-    </ProtectedRoute>
+      </header>
+
+      {/* Dashboard Content */}
+      <main className="px-6 py-8 max-w-6xl mx-auto space-y-8">
+        {/* Welcome Card */}
+        <Card className="shadow-sm border border-neutral-200">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium">
+              Welcome back, {user?.name} 👋
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-neutral-600">
+            Manage sweets, track inventory, and explore your shop.
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card
+            className="shadow-sm border border-neutral-200 cursor-pointer hover:shadow transition"
+            onClick={() => router.push("/sweets")}
+          >
+            <CardHeader>
+              <CardTitle className="text-base font-medium">
+                View Sweets
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-neutral-600">
+              Browse all sweets in the store.
+            </CardContent>
+          </Card>
+
+          {user?.role === "admin" && (
+            <Card
+              className="shadow-sm border border-neutral-200 cursor-pointer hover:shadow transition"
+              onClick={() => router.push("/admin/sweets")}
+            >
+              <CardHeader>
+                <CardTitle className="text-base font-medium">
+                  Manage Sweets
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-neutral-600">
+                Add, update, delete, and restock sweets.
+              </CardContent>
+            </Card>
+          )}
+
+          <Card className="shadow-sm border border-neutral-200">
+            <CardHeader>
+              <CardTitle className="text-base font-medium">
+                Coming Soon
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-neutral-600">
+              More dashboards and analytics on the way.
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
   );
 }
