@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function SweetsListPage() {
   const { token, user } = useAuth();
@@ -110,6 +111,30 @@ export default function SweetsListPage() {
                               }
                             >
                               Delete
+                            </Button>
+                            <Button
+                              size="sm"
+                              disabled={sweet.quantity === 0}
+                              onClick={async () => {
+                                try {
+                                  await axios.post(
+                                    `/sweets/${sweet.id}/purchase`,
+                                    {},
+                                    {
+                                      headers: {
+                                        Authorization: `Bearer ${token}`,
+                                      },
+                                    },
+                                  );
+                                  toast.success("Purchase successful!");
+                                  fetchSweets(); // refresh list
+                                } catch (err) {
+                                  console.error(err);
+                                  toast.error("Purchase failed");
+                                }
+                              }}
+                            >
+                              {sweet.quantity === 0 ? "Out of Stock" : "Buy"}
                             </Button>
                           </td>
                         )}
