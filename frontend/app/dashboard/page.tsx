@@ -1,13 +1,36 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import axios from "@/lib/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth();
   const router = useRouter();
+
+  const [sweets, setSweets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSweets = async () => {
+    try {
+      const res = await axios.get("/sweets", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSweets(res.data);
+    } catch (err) {
+      console.error("Failed to load sweets:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!token) router.push("/login");
+    else fetchSweets();
+  }, [token]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -97,6 +120,51 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* 🔥 Show All Sweets Here */}
+        <section>
+          <h2 className="text-lg font-semibold mb-4">Available Sweets</h2>
+
+          {loading ? (
+            <p className="text-neutral-500">Loading sweets...</p>
+          ) : sweets.length === 0 ? (
+            <p className="text-neutral-500">No sweets available.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {sweets.map((sweet: any) => (
+                <Card
+                  key={sweet.id}
+                  className="border border-neutral-200 shadow-sm hover:shadow transition p-4"
+                >
+                  <img
+                    src={sweet.imageUrl || "/placeholder.png"}
+                    alt={sweet.name}
+                    className="w-full h-40 object-cover rounded-md mb-3"
+                  />
+
+                  <h3 className="font-medium text-lg">{sweet.name}</h3>
+                  <p className="text-neutral-600 text-sm">
+                    Category: {sweet.category}
+                  </p>
+                  <p className="text-neutral-600 text-sm">
+                    Price: ₹{sweet.price}
+                  </p>
+                  <p className="text-neutral-600 text-sm">
+                    Stock: {sweet.quantity}
+                  </p>
+
+                  <Button
+                    className="mt-3 w-full"
+                    disabled={sweet.stock === 0}
+                    onClick={() => router.push(`/sweets/${sweet.id}/purchase`)}
+                  >
+                    {sweet.stock === 0 ? "Out of Stock" : "Buy"}
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );
