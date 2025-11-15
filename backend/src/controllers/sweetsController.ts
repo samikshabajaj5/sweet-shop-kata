@@ -2,18 +2,24 @@ import { Request, Response } from "express";
 import Sweet from "../models/Sweet";
 import { Op } from "sequelize";
 
-export const createSweet = async (req: Request, res: Response) => {
+export async function createSweet(req: Request, res: Response) {
   try {
-    const { name, category, price, quantity } = req.body;
+    const { name, category, price, quantity, imageUrl } = req.body;
 
-    const sweet = await Sweet.create({ name, category, price, quantity });
+    const sweet = await Sweet.create({
+      name,
+      category,
+      price,
+      quantity,
+      imageUrl,
+    });
+
     return res.status(201).json(sweet);
-  } catch (error: any) {
-    return res
-      .status(500)
-      .json({ error: "Failed to create sweet", details: error.message });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Failed to create sweet" });
   }
-};
+}
 
 export const getAllSweets = async (req: Request, res: Response) => {
   try {
@@ -44,16 +50,40 @@ export const searchSweets = async (req: Request, res: Response) => {
   }
 };
 
+export const getSweetById = async (req: Request, res: Response) => {
+  try {
+    const sweet = await Sweet.findByPk(req.params.id);
+
+    if (!sweet) {
+      return res.status(404).json({ error: "Sweet not found" });
+    }
+
+    return res.json(sweet);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Failed to fetch sweet" });
+  }
+};
+
 export const updateSweet = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-
     const sweet = await Sweet.findByPk(id);
-    if (!sweet) return res.status(404).json({ error: "Sweet not found" });
+    if (!sweet) return res.status(404).json({ error: "Not found" });
 
-    await sweet.update(req.body);
-    return res.status(200).json(sweet);
-  } catch (error: any) {
+    const { name, category, price, quantity, imageUrl } = req.body;
+
+    await sweet.update({
+      name,
+      category,
+      price,
+      quantity,
+      imageUrl,
+    });
+
+    return res.json(sweet);
+  } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: "Failed to update sweet" });
   }
 };

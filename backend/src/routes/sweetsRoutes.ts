@@ -5,6 +5,7 @@ import {
   searchSweets,
   updateSweet,
   deleteSweet,
+  getSweetById,
 } from "../controllers/sweetsController";
 
 import { authenticate, isAdmin } from "../middleware/authMiddleware";
@@ -35,5 +36,6 @@ router.get(
 router.put("/:id", validate(updateSweetSchema), asyncHandler(updateSweet));
 
 router.delete("/:id", isAdmin, asyncHandler(deleteSweet));
+router.get("/:id", getSweetById);
 
 export default router;
