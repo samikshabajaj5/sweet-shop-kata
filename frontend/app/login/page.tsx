@@ -4,79 +4,79 @@ import { useState } from "react";
 import api from "@/lib/api/axios";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// import { useToast } from "@/components/ui/use-toast";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
+  //   const { toast } = useToast();
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-
-  const [error, setError] = useState("");
+  const [form, setForm] = useState({ email: "", password: "" });
 
   const handleChange = (e: any) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    setError("");
 
     try {
       const res = await api.post("/auth/login", form);
-
       login(res.data.token, res.data.user);
+
+      //   toast({ title: "Login Successful", description: "Welcome back!" });
 
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.error || "Login failed");
+      //   toast({
+      //     title: "Login Failed",
+      //     description: err.response?.data?.error || "Invalid credentials",
+      //     variant: "destructive",
+      //   });
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-md rounded p-6 w-96"
-      >
-        <h1 className="text-2xl font-bold mb-4">Login</h1>
+    <div className="flex justify-center items-center h-screen">
+      <Card className="w-96">
+        <CardHeader>
+          <CardTitle>Login</CardTitle>
+        </CardHeader>
 
-        {error && <p className="text-red-600 mb-3">{error}</p>}
+        <CardContent>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <Input
+              name="email"
+              type="email"
+              placeholder="Email"
+              onChange={handleChange}
+            />
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          className="border p-2 w-full mb-3 rounded"
-          onChange={handleChange}
-        />
+            <Input
+              name="password"
+              type="password"
+              placeholder="Password"
+              onChange={handleChange}
+            />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          className="border p-2 w-full mb-4 rounded"
-          onChange={handleChange}
-        />
+            <Button type="submit" className="w-full">
+              Login
+            </Button>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white w-full py-2 rounded"
-        >
-          Login
-        </button>
-
-        <p className="mt-3 text-sm text-center">
-          Don't have an account?{" "}
-          <span
-            onClick={() => router.push("/register")}
-            className="text-blue-600 cursor-pointer"
-          >
-            Register
-          </span>
-        </p>
-      </form>
+            <p className="text-sm text-center">
+              Don’t have an account?{" "}
+              <span
+                onClick={() => router.push("/register")}
+                className="text-blue-600 cursor-pointer"
+              >
+                Register
+              </span>
+            </p>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -3,84 +3,93 @@
 import { useState } from "react";
 import api from "@/lib/api/axios";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { login } = useAuth();
+  //   const { toast } = useToast();
+
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
   });
 
-  const [error, setError] = useState("");
-
-  const handleChange = (e: any) => {
+  const handleChange = (e: any) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    setError("");
-
     try {
-      await api.post("/auth/register", form);
+      const res = await api.post("/auth/register", form);
+
+      toast("Account created", {
+        description: "Welcome! You can now log in.",
+      });
+
       router.push("/login");
     } catch (err: any) {
-      setError(err.response?.data?.error || "Registration failed");
+      toast("Registration Failed", {
+        description: err.response?.data?.error || "Something went wrong.",
+      });
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-md rounded p-6 w-96"
-      >
-        <h1 className="text-2xl font-bold mb-4">Register</h1>
+    <div className="flex justify-center items-center h-screen bg-white">
+      <Card className="w-96 shadow-sm border border-neutral-200">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">
+            Create Account
+          </CardTitle>
+        </CardHeader>
 
-        {error && <p className="text-red-600 mb-3">{error}</p>}
+        <CardContent>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <Input
+              name="name"
+              placeholder="Full Name"
+              onChange={handleChange}
+              className="focus-visible:ring-0"
+            />
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          className="border p-2 w-full mb-3 rounded"
-          onChange={handleChange}
-        />
+            <Input
+              name="email"
+              type="email"
+              placeholder="Email"
+              onChange={handleChange}
+              className="focus-visible:ring-0"
+            />
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          className="border p-2 w-full mb-3 rounded"
-          onChange={handleChange}
-        />
+            <Input
+              name="password"
+              type="password"
+              placeholder="Password"
+              onChange={handleChange}
+              className="focus-visible:ring-0"
+            />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          className="border p-2 w-full mb-4 rounded"
-          onChange={handleChange}
-        />
+            <Button type="submit" className="w-full">
+              Register
+            </Button>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white w-full py-2 rounded"
-        >
-          Register
-        </button>
-
-        <p className="mt-3 text-sm text-center">
-          Already have an account?{" "}
-          <span
-            onClick={() => router.push("/login")}
-            className="text-blue-600 cursor-pointer"
-          >
-            Login
-          </span>
-        </p>
-      </form>
+            <p className="text-sm text-center text-neutral-600">
+              Already have an account?{" "}
+              <span
+                className="text-blue-600 cursor-pointer"
+                onClick={() => router.push("/login")}
+              >
+                Login
+              </span>
+            </p>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
